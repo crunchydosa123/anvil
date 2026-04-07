@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	"github.com/crunchydosa123/anvil/lexer"
+	"github.com/crunchydosa123/anvil/parser"
 )
 
 func main() {
-	input := "let x = 10;"
-	l := lexer.New(input)
+	l := lexer.New("let x = 10;")
+	p := parser.New(l)
 
-	for tok := l.NextToken(); tok.Type != "EOF"; tok = l.NextToken() {
-		fmt.Printf("%+v\n", tok)
-	}
+	program := p.ParseProgram()
+	fmt.Println(program.String())
 }
