@@ -8,6 +8,18 @@ import (
 	"github.com/crunchydosa123/anvil/token"
 )
 
+const (
+	_ int = iota
+	LOWEST
+	SUM
+	PRODUCT
+)
+
+var precedences = map[token.Type]int{
+	token.PLUS:     SUM,
+	token.ASTERISK: PRODUCT,
+}
+
 type Parser struct {
 	l *lexer.Lexer
 
@@ -68,7 +80,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	// move to value
 	p.nextToken()
 
-	stmt.Value = p.parseIntegerLiteral()
+	stmt.Value = p.parseExpression(LOWEST)
 	if p.peekToken.Type == token.SEMICOLON {
 		p.nextToken()
 	}
@@ -82,4 +94,66 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return &ast.IntegerLiteral{
 		Value: val,
 	}
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	left := p.parsePrimary()
+
+	for p.peekToken.Type != token.SEMICOLON && precedence < p.peekPrecedence() {
+		p.nextToken()
+
+		left = p.parseInfixExpression(left)
+	}
+	return left
+}
+
+func (p *Parser) parsePrimary() ast.Expression {
+	switch p.curToken.Type {
+	case token.INT:
+		return p.parseIntegerLiteral()
+	case token.IDENT:
+		return &ast.Identifier{Value: p.curToken.Literal}
+	case token.LPAREN:
+		p.nextToken()
+
+		exp := p.parseExpression(LOWEST)
+
+		if p.peekToken.Type == token.RPAREN {
+			p.nextToken()
+		}
+
+		return exp
+	default:
+		return nil
+	}
+}
+
+func (p *Parser) peekPrecedence() int {
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
+	}
+
+	return LOWEST
+}
+
+func (p *Parser) currPrecedence() int {
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
+	}
+
+	return LOWEST
+}
+
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	exp := &ast.InfixExpression{
+		Left:     left,
+		Operator: p.curToken.Literal,
+	}
+
+	precedence := p.currPrecedence()
+	p.nextToken()
+
+	exp.Right = p.parseExpression(precedence)
+
+	return exp
 }

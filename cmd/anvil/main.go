@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	l := lexer.New("let x = 10;")
+	l := lexer.New("let x =(2 + 3) * 4;")
 	p := parser.New(l)
 
 	program := p.ParseProgram()
