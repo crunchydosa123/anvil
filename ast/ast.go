@@ -89,6 +89,13 @@ func (p *Program) String() string {
 	return out.String()
 }
 
+func (p *Program) TokenLiteral() string {
+	if len(p.Statements) > 0 {
+		return p.Statements[0].TokenLiteral()
+	}
+	return ""
+}
+
 type InfixExpression struct {
 	Left     Expression
 	Operator string
