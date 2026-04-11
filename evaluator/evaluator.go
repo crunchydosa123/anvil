@@ -1,6 +1,10 @@
 package evaluator
 
-import "github.com/crunchydosa123/anvil/ast"
+import (
+	"fmt"
+
+	"github.com/crunchydosa123/anvil/ast"
+)
 
 func Eval(node ast.Node, env *Environment) int64 {
 	switch node := node.(type) {
@@ -19,6 +23,10 @@ func Eval(node ast.Node, env *Environment) int64 {
 		left := Eval(node.Left, env)
 		right := Eval(node.Right, env)
 		return evalInfix(node.Operator, left, right)
+	case *ast.PrintStatement:
+		val := Eval(node.Value, env)
+		fmt.Println(val)
+		return val
 	}
 
 	return 0

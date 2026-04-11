@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/crunchydosa123/anvil/evaluator"
 	"github.com/crunchydosa123/anvil/lexer"
@@ -9,17 +10,35 @@ import (
 )
 
 func main() {
-	input := `
-	let x = 2 + 3 * 4;
-	let y = x + 1;
-	`
+	if len(os.Args) < 3 {
+		fmt.Println("usage: anvil run <file>")
+		return
+	}
+
+	command := os.Args[1]
+	filename := os.Args[2]
+
+	switch command {
+	case "run":
+		runFile(filename)
+	default:
+		fmt.Println("unknown command:", command)
+	}
+}
+
+func runFile(filename string) {
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		fmt.Println("error reading file:", err)
+		return
+	}
+
+	input := string(content)
+
 	l := lexer.New(input)
 	p := parser.New(l)
-
 	program := p.ParseProgram()
 
 	env := evaluator.NewEnvironment()
-	result := evaluator.Eval(program, env)
-
-	fmt.Println(result)
+	evaluator.Eval(program, env)
 }

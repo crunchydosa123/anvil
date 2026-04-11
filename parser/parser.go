@@ -59,6 +59,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.PRINT:
+		return p.parsePrintStatement()
 	default:
 		return nil
 	}
@@ -156,4 +158,24 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	exp.Right = p.parseExpression(precedence)
 
 	return exp
+}
+
+func (p *Parser) parsePrintStatement() *ast.PrintStatement {
+	stmt := &ast.PrintStatement{}
+
+	p.nextToken()
+
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekToken.Type == token.RPAREN {
+		p.nextToken()
+	}
+
+	if p.peekToken.Type == token.SEMICOLON {
+		p.nextToken()
+	}
+
+	return stmt
 }

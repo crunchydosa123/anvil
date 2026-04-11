@@ -121,3 +121,25 @@ func (ie *InfixExpression) String() string {
 
 	return out.String()
 }
+
+type PrintStatement struct {
+	Value Expression
+}
+
+func (ps *PrintStatement) statementNode() {}
+
+func (ps *PrintStatement) TokenLiteral() string {
+	return "print"
+}
+
+func (ps *PrintStatement) String() string {
+	var out strings.Builder
+
+	out.WriteString("print(")
+	if ps.Value != nil {
+		out.WriteString(ps.Value.String())
+	}
+	out.WriteString(");")
+
+	return out.String()
+}
