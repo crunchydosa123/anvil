@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/crunchydosa123/anvil/ast"
@@ -25,6 +26,8 @@ type Parser struct {
 
 	curToken  token.Token
 	peekToken token.Token
+
+	errors []string
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -76,8 +79,9 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		Value: p.curToken.Literal,
 	}
 
-	// expect =
-	p.nextToken()
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
 
 	// move to value
 	p.nextToken()
@@ -178,4 +182,25 @@ func (p *Parser) parsePrintStatement() *ast.PrintStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) Errors() []string {
+	return p.errors
+}
+
+func (p *Parser) expectPeek(t token.Type) bool {
+	if p.peekToken.Type == t {
+		p.nextToken()
+		return true
+	}
+
+	msg := fmt.Sprintf(
+		"expected token to be %s, got %s instead",
+		t,
+		p.peekToken.Type,
+	)
+
+	p.errors = append(p.errors, msg)
+
+	return false
 }

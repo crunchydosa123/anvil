@@ -1,3 +1,4 @@
+let = 10;
 let x = 2 + 3 * 4;
 let y = x + 1;
 print(y);
