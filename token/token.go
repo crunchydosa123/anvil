@@ -27,11 +27,19 @@ const (
 
 	LET   = "LET"
 	PRINT = "PRINT"
+
+	LBRACE      = "{"
+	RBRACE      = "}"
+	COMMA       = ","
+	RETURN      = "RETURN"
+	FUNCTIONDEF = "FN"
 )
 
 var keywords = map[string]Type{
-	"let":   LET,
-	"print": PRINT,
+	"let":    LET,
+	"print":  PRINT,
+	"fn":     FUNCTIONDEF,
+	"return": RETURN,
 }
 
 func LookupIdent(ident string) Type {

@@ -25,6 +25,24 @@ type LetStatement struct {
 	Value Expression
 }
 
+type FunctionLiteral struct {
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+type CallExpression struct {
+	Function  Expression
+	Arguments []Expression
+}
+
+type BlockStatement struct {
+	Statements []Statement
+}
+
+type ReturnStatement struct {
+	Value Expression
+}
+
 func (ls *LetStatement) statementNode() {}
 
 func (ls *LetStatement) TokenLiteral() string {
