@@ -161,3 +161,73 @@ func (ps *PrintStatement) String() string {
 
 	return out.String()
 }
+
+func (fl *FunctionLiteral) expressionNode() {}
+
+func (bs *FunctionLiteral) statementNode() {}
+
+func (fl *FunctionLiteral) TokenLiteral() string {
+	return "fn"
+}
+
+func (fl *FunctionLiteral) String() string {
+	var out strings.Builder
+
+	out.WriteString("fn(")
+
+	for i, p := range fl.Parameters {
+		out.WriteString(p.String())
+		if i < len(fl.Parameters)-1 {
+			out.WriteString(", ")
+		}
+	}
+
+	out.WriteString(") ")
+	out.WriteString(fl.Body.String())
+
+	return out.String()
+}
+
+func (ce *CallExpression) expressionNode() {}
+
+func (ce *CallExpression) TokenLiteral() string {
+	return ce.Function.TokenLiteral()
+}
+
+func (ce *CallExpression) String() string {
+	var out strings.Builder
+
+	out.WriteString(ce.Function.String())
+	out.WriteString("(")
+
+	for i, arg := range ce.Arguments {
+		out.WriteString(arg.String())
+		if i < len(ce.Arguments)-1 {
+			out.WriteString(", ")
+		}
+	}
+
+	out.WriteString(")")
+
+	return out.String()
+}
+
+func (bs *BlockStatement) statementNode() {}
+
+func (bs *BlockStatement) TokenLiteral() string {
+	return ""
+}
+
+func (bs *BlockStatement) String() string {
+	var out strings.Builder
+
+	out.WriteString("{ ")
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	out.WriteString(" }")
+
+	return out.String()
+}

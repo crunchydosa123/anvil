@@ -14,11 +14,13 @@ const (
 	LOWEST
 	SUM
 	PRODUCT
+	CALL
 )
 
 var precedences = map[token.Type]int{
 	token.PLUS:     SUM,
 	token.ASTERISK: PRODUCT,
+	token.LPAREN:   CALL,
 }
 
 type Parser struct {
@@ -108,7 +110,13 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	for p.peekToken.Type != token.SEMICOLON && precedence < p.peekPrecedence() {
 		p.nextToken()
 
-		left = p.parseInfixExpression(left)
+		switch p.curToken.Type {
+		case token.PLUS, token.ASTERISK:
+			left = p.parseInfixExpression(left)
+		case token.LPAREN:
+			left = p.parseCallExpression(left)
+		}
+
 	}
 	return left
 }
@@ -121,14 +129,14 @@ func (p *Parser) parsePrimary() ast.Expression {
 		return &ast.Identifier{Value: p.curToken.Literal}
 	case token.LPAREN:
 		p.nextToken()
-
 		exp := p.parseExpression(LOWEST)
-
-		if p.peekToken.Type == token.RPAREN {
-			p.nextToken()
+		if !p.expectPeek(token.RPAREN) {
+			return nil
 		}
-
 		return exp
+	case token.FUNCTIONDEF:
+		return p.parseFunction()
+
 	default:
 		return nil
 	}
@@ -203,4 +211,55 @@ func (p *Parser) expectPeek(t token.Type) bool {
 	p.errors = append(p.errors, msg)
 
 	return false
+}
+
+func (p *Parser) parseFunction() ast.Expression {
+	lit := &ast.FunctionLiteral{}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	lit.Parameters = p.parseFunctionParameters()
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	lit.Body = p.parseBlockStatement()
+
+	return lit
+}
+
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{
+		Function: function,
+	}
+
+	exp.Arguments = p.parseCallArguments()
+	return exp
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	var args []ast.Expression
+
+	if p.peekToken.Type == token.RPAREN {
+		p.nextToken()
+		return args
+	}
+
+	p.nextToken()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.peekToken.Type == token.COMMA {
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return args
 }
