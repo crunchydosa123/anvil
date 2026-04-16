@@ -231,3 +231,23 @@ func (bs *BlockStatement) String() string {
 
 	return out.String()
 }
+
+func (rs *ReturnStatement) statementNode() {}
+
+func (rs *ReturnStatement) TokenLiteral() string {
+	return "return"
+}
+
+func (rs *ReturnStatement) String() string {
+	var out strings.Builder
+
+	out.WriteString("return ")
+
+	if rs.Value != nil {
+		out.WriteString(rs.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}

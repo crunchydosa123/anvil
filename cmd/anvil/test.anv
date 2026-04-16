@@ -1,4 +1,6 @@
-let = 10;
-let x = 2 + 3 * 4;
-let y = x + 1;
-print(y);
+let add = fn(a, b) {
+  let x = a + b
+  return x
+};
+
+print(add(2, 3));
